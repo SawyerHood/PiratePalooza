@@ -40,14 +40,17 @@ namespace PiratePalooza
 		}
 
 		void touchFunction(List<CCTouch> touches, CCEvent touchEvent) {
-			Color = CCColor3B.Black;
+			//Color = CCColor3B.Black;
+			var location = touches [0].LocationOnScreen;
+			location = WorldToScreenspace (location);  //Layer.WorldToScreenspace(location); 
+			AddBlock (location);
 		}
 
 		void StartScheduling() {
-			Schedule (t => {
+			/*Schedule (t => {
 				elapsedTime += t;
 				AddBlock();
-			}, 1.0f);
+			}, 1.0f);*/
 
 			Schedule (t => {
 				world.Step (t, 8, 1);
@@ -91,11 +94,9 @@ namespace PiratePalooza
 			groundBody.CreateFixture (fd);
 		}
 
-		void AddBlock () {
+		void AddBlock (CCPoint p) {
 			var sprite = new CCPhysicsSprite (blockTexture, new CCRect (0, 0, 100, 100), PTM_RATIO);
 			blockBatch.AddChild (sprite);
-
-			CCPoint p = GetRandomPosition (sprite.ContentSize);
 
 			sprite.Position = new CCPoint (p.X, p.Y);
 
