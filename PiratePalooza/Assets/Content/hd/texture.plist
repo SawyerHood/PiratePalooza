@@ -17,10 +17,23 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
+            <key>cannon.png</key>
+            <dict>
+                <key>frame</key>
+                <string>{{104,2},{300,62}}</string>
+                <key>offset</key>
+                <string>{0,0}</string>
+                <key>rotated</key>
+                <false/>
+                <key>sourceColorRect</key>
+                <string>{{0,0},{300,62}}</string>
+                <key>sourceSize</key>
+                <string>{300,62}</string>
+            </dict>
             <key>cannonball.png</key>
             <dict>
                 <key>frame</key>
-                <string>{{104,2},{100,100}}</string>
+                <string>{{406,2},{100,100}}</string>
                 <key>offset</key>
                 <string>{0,0}</string>
                 <key>rotated</key>
@@ -38,9 +51,9 @@
             <key>realTextureFileName</key>
             <string>texture.png</string>
             <key>size</key>
-            <string>{206,104}</string>
+            <string>{508,104}</string>
             <key>smartupdate</key>
-            <string>$TexturePacker:SmartUpdate:9e46ad58648f5313a0f99d64a9b40e56:23d2a39e1646eaa80343e1678138dd52:ef86396999e18097aad14daa6638d5f9$</string>
+            <string>$TexturePacker:SmartUpdate:9b62b0a176a7e4e4de6c21d37fc11e3a:bd74f81a804d735e92a9dd6ba92915a7:ef86396999e18097aad14daa6638d5f9$</string>
             <key>textureFileName</key>
             <string>texture.png</string>
         </dict>

@@ -17,6 +17,7 @@ namespace PiratePalooza
 	public class NewGameLayer : CCLayerColor
 	{
 		const int PTM_RATIO = 100;
+		const float CANNON_FORCE = 1000;
 
 		float elapsedTime;
 		b2World world;
@@ -24,6 +25,8 @@ namespace PiratePalooza
 		CCSpriteSheet spriteSheet;
 		CCSpriteFrame blockFrame;
 		CCSpriteFrame ballFrame;
+		CCSpriteFrame cannonFrame;
+		Cannon cannonObj;
 
 
 
@@ -38,7 +41,12 @@ namespace PiratePalooza
 			spriteBatch = new CCSpriteBatchNode ("texture.png", 100);
 			blockFrame = spriteSheet.Frames.Find(x => x.TextureFilename == "block.png");
 			ballFrame = spriteSheet.Frames.Find(x => x.TextureFilename == "cannonball.png");
+			cannonFrame = spriteSheet.Frames.Find(x => x.TextureFilename == "cannon.png");
+			cannonObj = new Cannon (cannonFrame);
+			cannonObj.Position = new CCPoint (300, 100);
 			AddChild (spriteBatch, 1, 1);
+			AddChild (cannonObj);
+
 
 			StartScheduling ();
 		}
@@ -47,7 +55,8 @@ namespace PiratePalooza
 			//Color = CCColor3B.Black;
 			var location = touches [0].LocationOnScreen;
 			location = WorldToScreenspace (location);  //Layer.WorldToScreenspace(location); 
-			AddBall (location);
+			float angle = cannonObj.AimCannon (location);
+			AddBall (cannonObj.Position, angle);
 		}
 
 		void StartScheduling() {
@@ -73,22 +82,22 @@ namespace PiratePalooza
 
 		void StackSomeBlocks() {
 			List<CCPoint> points = new List<CCPoint> ();
-			points.Add (new CCPoint(500f, 0f));
-			points.Add (new CCPoint(500f, 100f));
-			points.Add (new CCPoint(500f, 200f));
-			points.Add (new CCPoint(500f, 300f));
-			points.Add (new CCPoint(500f, 400f));
-			points.Add (new CCPoint(500f, 500f));
-			points.Add (new CCPoint(500f, 600f));
-			points.Add (new CCPoint(700f, 0f));
-			points.Add (new CCPoint(700f, 100f));
-			points.Add (new CCPoint(700f, 200f));
-			points.Add (new CCPoint(700f, 300f));
-			points.Add (new CCPoint(700f, 400f));
-			points.Add (new CCPoint(700f, 500f));
-			points.Add (new CCPoint(700f, 600f));
-			points.Add (new CCPoint(650f, 700f));
-			points.Add (new CCPoint(550f, 700f));
+			points.Add (new CCPoint(1000f, 0f));
+			points.Add (new CCPoint(1000f, 100f));
+			points.Add (new CCPoint(1000f, 200f));
+			points.Add (new CCPoint(1000f, 300f));
+			points.Add (new CCPoint(1000f, 400f));
+			points.Add (new CCPoint(1000f, 500f));
+			points.Add (new CCPoint(1000f, 600f));
+			points.Add (new CCPoint(1200f, 0f));
+			points.Add (new CCPoint(1200f, 100f));
+			points.Add (new CCPoint(1200f, 200f));
+			points.Add (new CCPoint(1200f, 300f));
+			points.Add (new CCPoint(1200f, 400f));
+			points.Add (new CCPoint(1200f, 500f));
+			points.Add (new CCPoint(1200f, 600f));
+			points.Add (new CCPoint(1050f, 700f));
+			points.Add (new CCPoint(1150f, 700f));
 
 			foreach (var point in points) {
 				AddBlock (point);
@@ -155,7 +164,7 @@ namespace PiratePalooza
 
 		}
 
-		void AddBall (CCPoint p) {
+		void AddBall (CCPoint p, float angle) {
 
 			var sprite = new CCPhysicsSprite (ballFrame, PTM_RATIO);
 			spriteBatch.AddChild (sprite);
@@ -164,7 +173,7 @@ namespace PiratePalooza
 
 			var def = new b2BodyDef ();
 			def.position = new b2Vec2 (p.X / PTM_RATIO, p.Y / PTM_RATIO);
-			def.linearVelocity = new b2Vec2 (10f, 0.0f);
+			def.linearVelocity = new b2Vec2 (0.0f, 0.0f);
 			def.type = b2BodyType.b2_dynamicBody;
 			b2Body body = world.CreateBody (def);
 
@@ -180,6 +189,8 @@ namespace PiratePalooza
 			body.CreateFixture (fd);
 
 			sprite.PhysicsBody = body;
+			var angleInRadians = (-angle) * Math.PI / 180.0;
+			body.ApplyForceToCenter (new b2Vec2((float)Math.Cos (angleInRadians) * CANNON_FORCE, (float)Math.Sin (angleInRadians) * CANNON_FORCE));
 
 			#if !NETFX_CORE
 			Console.WriteLine ("sprite batch node count = {0}", spriteBatch.ChildrenCount);

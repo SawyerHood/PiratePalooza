@@ -67,6 +67,7 @@
     <Compile Include="CCPhysicsSprite.cs" />
     <Compile Include="GameLayer.cs" />
     <Compile Include="NewGameLayer.cs" />
+    <Compile Include="Cannon.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
