@@ -20,10 +20,11 @@ namespace PiratePalooza
 
 		float elapsedTime;
 		b2World world;
-		CCSpriteBatchNode blockBatch;
-		CCTexture2D blockTexture;
+		CCSpriteBatchNode spriteBatch;
 		CCSpriteSheet spriteSheet;
 		CCSpriteFrame blockFrame;
+		CCSpriteFrame ballFrame;
+
 
 
 		public NewGameLayer ()
@@ -34,10 +35,11 @@ namespace PiratePalooza
 			spriteSheet = new CCSpriteSheet ("texture.plist");
 			Color = new CCColor3B (CCColor4B.White);
 			Opacity = 255;
-			blockBatch = new CCSpriteBatchNode ("texture.png", 100);
-			blockTexture = blockBatch.Texture;
+			spriteBatch = new CCSpriteBatchNode ("texture.png", 100);
 			blockFrame = spriteSheet.Frames.Find(x => x.TextureFilename == "block.png");
-			AddChild (blockBatch, 1, 1);
+			ballFrame = spriteSheet.Frames.Find(x => x.TextureFilename == "cannonball.png");
+			AddChild (spriteBatch, 1, 1);
+
 			StartScheduling ();
 		}
 
@@ -45,7 +47,7 @@ namespace PiratePalooza
 			//Color = CCColor3B.Black;
 			var location = touches [0].LocationOnScreen;
 			location = WorldToScreenspace (location);  //Layer.WorldToScreenspace(location); 
-			AddBlock (location);
+			AddBall (location);
 		}
 
 		void StartScheduling() {
@@ -57,7 +59,7 @@ namespace PiratePalooza
 			Schedule (t => {
 				world.Step (t, 8, 1);
 
-				foreach (CCPhysicsSprite sprite in blockBatch.Children) {
+				foreach (CCPhysicsSprite sprite in spriteBatch.Children) {
 					if (sprite.Visible && sprite.PhysicsBody.Position.x < 0f || sprite.PhysicsBody.Position.x * PTM_RATIO > ContentSize.Width) { //or should it be Layer.VisibleBoundsWorldspace.Size.Width
 						world.DestroyBody (sprite.PhysicsBody);
 						sprite.Visible = false;
@@ -67,6 +69,30 @@ namespace PiratePalooza
 					}
 				}
 			});
+		}
+
+		void StackSomeBlocks() {
+			List<CCPoint> points = new List<CCPoint> ();
+			points.Add (new CCPoint(500f, 0f));
+			points.Add (new CCPoint(500f, 100f));
+			points.Add (new CCPoint(500f, 200f));
+			points.Add (new CCPoint(500f, 300f));
+			points.Add (new CCPoint(500f, 400f));
+			points.Add (new CCPoint(500f, 500f));
+			points.Add (new CCPoint(500f, 600f));
+			points.Add (new CCPoint(700f, 0f));
+			points.Add (new CCPoint(700f, 100f));
+			points.Add (new CCPoint(700f, 200f));
+			points.Add (new CCPoint(700f, 300f));
+			points.Add (new CCPoint(700f, 400f));
+			points.Add (new CCPoint(700f, 500f));
+			points.Add (new CCPoint(700f, 600f));
+			points.Add (new CCPoint(650f, 700f));
+			points.Add (new CCPoint(550f, 700f));
+
+			foreach (var point in points) {
+				AddBlock (point);
+			}
 		}
 
 		//Sets up a solid ground
@@ -99,7 +125,7 @@ namespace PiratePalooza
 		void AddBlock (CCPoint p) {
 
 			var sprite = new CCPhysicsSprite (blockFrame, PTM_RATIO);
-			blockBatch.AddChild (sprite);
+			spriteBatch.AddChild (sprite);
 
 			sprite.Position = new CCPoint (p.X, p.Y);
 
@@ -122,12 +148,47 @@ namespace PiratePalooza
 			sprite.PhysicsBody = body;
 
 			#if !NETFX_CORE
-			Console.WriteLine ("sprite batch node count = {0}", blockBatch.ChildrenCount);
+			Console.WriteLine ("sprite batch node count = {0}", spriteBatch.ChildrenCount);
 			#else
 
 			#endif
 
 		}
+
+		void AddBall (CCPoint p) {
+
+			var sprite = new CCPhysicsSprite (ballFrame, PTM_RATIO);
+			spriteBatch.AddChild (sprite);
+
+			sprite.Position = new CCPoint (p.X, p.Y);
+
+			var def = new b2BodyDef ();
+			def.position = new b2Vec2 (p.X / PTM_RATIO, p.Y / PTM_RATIO);
+			def.linearVelocity = new b2Vec2 (10f, 0.0f);
+			def.type = b2BodyType.b2_dynamicBody;
+			b2Body body = world.CreateBody (def);
+
+			var circle = new b2CircleShape();
+			circle.Radius = .5f;
+
+
+			var fd = new b2FixtureDef ();
+			fd.shape = circle;
+			fd.density = 1f;
+			fd.restitution = 0f;
+			fd.friction = 1f;
+			body.CreateFixture (fd);
+
+			sprite.PhysicsBody = body;
+
+			#if !NETFX_CORE
+			Console.WriteLine ("sprite batch node count = {0}", spriteBatch.ChildrenCount);
+			#else
+
+			#endif
+
+		}
+			
 
 		CCPoint GetRandomPosition (CCSize spriteSize)
 		{
@@ -151,6 +212,7 @@ namespace PiratePalooza
 		{
 			base.OnEnter ();
 			InitPhysics ();
+			StackSomeBlocks ();
 		}
 
 		public static CCScene GameScene (CCWindow mainWindow)

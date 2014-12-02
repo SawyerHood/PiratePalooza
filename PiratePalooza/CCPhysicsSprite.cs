@@ -39,19 +39,8 @@ namespace PiratePalooza
 					x += AnchorPointInPoints.X;
 					y += AnchorPointInPoints.Y;
 				}
-
-				// Make matrix
+					
 				float radians = PhysicsBody.Angle;
-				//var c = (float)Math.Cos (radians);
-				//var s = (float)Math.Sin (radians);
-
-				/*if (!AnchorPointInPoints.Equals (CCPoint.Zero)) 
-				{
-					x += c * -AnchorPointInPoints.X + -s * -AnchorPointInPoints.Y;
-					y += s * -AnchorPointInPoints.X + c * -AnchorPointInPoints.Y;
-				}*/
-
-
 
 				Position = new CCPoint(x, y);
 				Rotation = -radians * 57.2957795f;
