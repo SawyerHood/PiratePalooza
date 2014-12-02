@@ -16,6 +16,13 @@ namespace PiratePalooza
 			this.ptmRatio = ptmRatio;
 		}
 
+		public CCPhysicsSprite(CCSpriteFrame frame, float ptmRatio) : base(frame)
+		{
+			this.ptmRatio = ptmRatio;
+		}
+
+
+
 		public b2Body PhysicsBody { get; set; }
 
 		public void UpdateTransformLocation()

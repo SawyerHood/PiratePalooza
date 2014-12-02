@@ -22,6 +22,8 @@ namespace PiratePalooza
 		b2World world;
 		CCSpriteBatchNode blockBatch;
 		CCTexture2D blockTexture;
+		CCSpriteSheet spriteSheet;
+		CCSpriteFrame blockFrame;
 
 
 		public NewGameLayer ()
@@ -29,12 +31,12 @@ namespace PiratePalooza
 			var touchListener = new CCEventListenerTouchAllAtOnce ();
 			touchListener.OnTouchesEnded = touchFunction;
 			AddEventListener (touchListener, this);
-
+			spriteSheet = new CCSpriteSheet ("texture.plist");
 			Color = new CCColor3B (CCColor4B.White);
 			Opacity = 255;
-
-			blockBatch = new CCSpriteBatchNode ("block", 100);
+			blockBatch = new CCSpriteBatchNode ("texture.png", 100);
 			blockTexture = blockBatch.Texture;
+			blockFrame = spriteSheet.Frames.Find(x => x.TextureFilename == "block.png");
 			AddChild (blockBatch, 1, 1);
 			StartScheduling ();
 		}
@@ -47,10 +49,10 @@ namespace PiratePalooza
 		}
 
 		void StartScheduling() {
-			/*Schedule (t => {
+			Schedule (t => {
 				elapsedTime += t;
-				AddBlock();
-			}, 1.0f);*/
+				//AddBlock();
+			}, 1.0f);
 
 			Schedule (t => {
 				world.Step (t, 8, 1);
@@ -95,7 +97,8 @@ namespace PiratePalooza
 		}
 
 		void AddBlock (CCPoint p) {
-			var sprite = new CCPhysicsSprite (blockTexture, new CCRect (0, 0, 100, 100), PTM_RATIO);
+
+			var sprite = new CCPhysicsSprite (blockFrame, PTM_RATIO);
 			blockBatch.AddChild (sprite);
 
 			sprite.Position = new CCPoint (p.X, p.Y);
