@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using CocosDenshion;
 using CocosSharp;
 using System.Linq;
+using System.Diagnostics;
+using Newtonsoft.Json;
 
 #if NETFX_CORE
 
@@ -16,7 +18,8 @@ namespace PiratePalooza
 {
 	public class NewGameLayer : CCLayerColor
 	{
-		const int PTM_RATIO = 100;
+
+		const int PTM_RATIO = 32;
 		const float CANNON_FORCE = 1000;
 
 		float elapsedTime;
@@ -26,12 +29,19 @@ namespace PiratePalooza
 		CCSpriteFrame blockFrame;
 		CCSpriteFrame ballFrame;
 		CCSpriteFrame cannonFrame;
-		Cannon cannonObj;
+		List<Cannon> cannons;
+		int playerTurn;
+		Stopwatch timeSinceFire;
+		CCLabelTtf turnLabel;
+
 
 
 
 		public NewGameLayer ()
 		{
+			timeSinceFire = new Stopwatch ();
+			timeSinceFire.Start ();
+			playerTurn = 0;
 			var touchListener = new CCEventListenerTouchAllAtOnce ();
 			touchListener.OnTouchesEnded = touchFunction;
 			AddEventListener (touchListener, this);
@@ -42,21 +52,54 @@ namespace PiratePalooza
 			blockFrame = spriteSheet.Frames.Find(x => x.TextureFilename == "block.png");
 			ballFrame = spriteSheet.Frames.Find(x => x.TextureFilename == "cannonball.png");
 			cannonFrame = spriteSheet.Frames.Find(x => x.TextureFilename == "cannon.png");
-			cannonObj = new Cannon (cannonFrame);
-			cannonObj.Position = new CCPoint (300, 100);
 			AddChild (spriteBatch, 1, 1);
-			AddChild (cannonObj);
-
-
+			InitCannons ();
+			InitLabel ();
 			StartScheduling ();
 		}
 
+		void InitCannons() {
+			cannons = new List<Cannon> ();
+			Cannon cannonObj;
+			cannonObj = new Cannon (cannonFrame);
+			cannonObj.Position = new CCPoint (400, 100);
+			Cannon cannonObj2 = new Cannon (cannonFrame);
+			cannonObj2.Position = new CCPoint (880, 100);
+			cannons.Add (cannonObj);
+			cannons.Add (cannonObj2);
+			AddChild (cannonObj);
+			AddChild (cannonObj2);
+		}
+
+		void InitLabel() {
+			turnLabel = new CCLabelTtf("Player 1's Turn", "arial", 22) {
+				Position = new CCPoint(VisibleBoundsWorldspace.Center.X + 600, VisibleBoundsWorldspace.Center.Y + 600),
+				Color = CCColor3B.Green,
+				HorizontalAlignment = CCTextAlignment.Center,
+				VerticalAlignment = CCVerticalTextAlignment.Center,
+				AnchorPoint = CCPoint.AnchorMiddle
+			};
+
+			AddChild (turnLabel);
+		}
+
+
 		void touchFunction(List<CCTouch> touches, CCEvent touchEvent) {
 			//Color = CCColor3B.Black;
+			if (timeSinceFire.ElapsedMilliseconds < 1000) {
+				return;
+			}
+			timeSinceFire.Restart ();
+			var currCannon = cannons[playerTurn];
 			var location = touches [0].LocationOnScreen;
 			location = WorldToScreenspace (location);  //Layer.WorldToScreenspace(location); 
-			float angle = cannonObj.AimCannon (location);
-			AddBall (cannonObj.Position, angle);
+			float angle = currCannon.AimCannon (location);
+			AddBall (currCannon.Position, angle);
+			playerTurn += 1;
+			if (playerTurn >= cannons.Count) {
+				playerTurn = 0;
+			}
+			turnLabel.Text = "Player " + (playerTurn + 1) + "'s Turn";
 		}
 
 		void StartScheduling() {
@@ -82,12 +125,13 @@ namespace PiratePalooza
 
 		void StackSomeBlocks() {
 			List<CCPoint> points = new List<CCPoint> ();
-			points.Add (new CCPoint(1000f, 0f));
-			points.Add (new CCPoint(1000f, 100f));
-			points.Add (new CCPoint(1000f, 200f));
-			points.Add (new CCPoint(1000f, 300f));
-			points.Add (new CCPoint(1000f, 400f));
-			points.Add (new CCPoint(1000f, 500f));
+			List<MapEntity> entities = new List<MapEntity> ();
+			points.Add (new CCPoint(500f, 0f));
+			points.Add (new CCPoint(500f, 100f));
+			points.Add (new CCPoint(500f, 200f));
+			points.Add (new CCPoint(500f, 300f));
+			points.Add (new CCPoint(500f, 400f));
+			points.Add (new CCPoint(500f, 500f));
 			points.Add (new CCPoint(1000f, 600f));
 			points.Add (new CCPoint(1200f, 0f));
 			points.Add (new CCPoint(1200f, 100f));
@@ -99,9 +143,16 @@ namespace PiratePalooza
 			points.Add (new CCPoint(1050f, 700f));
 			points.Add (new CCPoint(1150f, 700f));
 
-			foreach (var point in points) {
-				AddBlock (point);
+			for (int i = 0; i < points.Count; i++) {
+				//AddBlock (point);
+				entities.Add (new MapEntity (EntityType.Block, points[i].X, points[i].Y, 1));
+
 			}
+			string json = JsonConvert.SerializeObject (entities);
+			Console.WriteLine (json);
+
+			List<MapEntity> entities2 = JsonConvert.DeserializeObject <List<MapEntity>> (json);
+			LoadMapFromEntityList (entities2);
 		}
 
 		//Sets up a solid ground
@@ -164,6 +215,16 @@ namespace PiratePalooza
 
 		}
 
+		void LoadMapFromEntityList (List<MapEntity> list) {
+			foreach (var entity in list) {
+				Console.WriteLine (entity.x);
+				if (entity.type == EntityType.Block) {
+					AddBlock (new CCPoint(entity.x, entity.y));
+				} 
+			}
+		}
+
+
 		void AddBall (CCPoint p, float angle) {
 
 			var sprite = new CCPhysicsSprite (ballFrame, PTM_RATIO);
@@ -201,16 +262,6 @@ namespace PiratePalooza
 		}
 			
 
-		CCPoint GetRandomPosition (CCSize spriteSize)
-		{
-			double rnd = CCRandom.NextDouble ();
-			double randomX = (rnd > 0) 
-				? rnd * VisibleBoundsWorldspace.Size.Width - spriteSize.Width / 2 
-				: spriteSize.Width / 2;
-
-			return new CCPoint ((float)randomX, VisibleBoundsWorldspace.Size.Height - spriteSize.Height / 2);
-		}
-
 		protected override void AddedToScene ()
 		{
 			base.AddedToScene ();
@@ -224,6 +275,7 @@ namespace PiratePalooza
 			base.OnEnter ();
 			InitPhysics ();
 			StackSomeBlocks ();
+
 		}
 
 		public static CCScene GameScene (CCWindow mainWindow)

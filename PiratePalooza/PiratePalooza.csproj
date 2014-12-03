@@ -57,17 +57,21 @@
     <Reference Include="box2d">
       <HintPath>..\packages\CocosSharp.Android.1.2.1.0\lib\MonoAndroid10\box2d.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.6.0.6\lib\portable-net40+sl5+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MainActivity.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PiratePaloozaApplicationDelegate.cs" />
     <Compile Include="GameStartLayer.cs" />
     <Compile Include="CCPhysicsSprite.cs" />
     <Compile Include="GameLayer.cs" />
     <Compile Include="NewGameLayer.cs" />
     <Compile Include="Cannon.cs" />
+    <Compile Include="PiratePaloozaApplicationDelegate.cs" />
+    <Compile Include="Map\MapEntity.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
@@ -83,6 +87,7 @@
   <Import Project="$(MSBuildExtensionsPath)\Novell\Novell.MonoDroid.CSharp.targets" />
   <ItemGroup>
     <Folder Include="Assets\Content\" />
+    <Folder Include="Map\" />
   </ItemGroup>
   <ItemGroup>
     <AndroidAsset Include="Assets\Content\Sounds\tap.mp3" />

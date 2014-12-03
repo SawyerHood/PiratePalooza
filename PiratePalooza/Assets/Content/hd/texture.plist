@@ -7,41 +7,41 @@
             <key>block.png</key>
             <dict>
                 <key>frame</key>
-                <string>{{2,2},{100,100}}</string>
+                <string>{{2,2},{32,32}}</string>
                 <key>offset</key>
                 <string>{0,0}</string>
                 <key>rotated</key>
                 <false/>
                 <key>sourceColorRect</key>
-                <string>{{0,0},{100,100}}</string>
+                <string>{{0,0},{32,32}}</string>
                 <key>sourceSize</key>
-                <string>{100,100}</string>
+                <string>{32,32}</string>
             </dict>
             <key>cannon.png</key>
             <dict>
                 <key>frame</key>
-                <string>{{104,2},{300,62}}</string>
+                <string>{{36,2},{150,31}}</string>
                 <key>offset</key>
                 <string>{0,0}</string>
                 <key>rotated</key>
                 <false/>
                 <key>sourceColorRect</key>
-                <string>{{0,0},{300,62}}</string>
+                <string>{{0,0},{150,31}}</string>
                 <key>sourceSize</key>
-                <string>{300,62}</string>
+                <string>{150,31}</string>
             </dict>
             <key>cannonball.png</key>
             <dict>
                 <key>frame</key>
-                <string>{{406,2},{100,100}}</string>
+                <string>{{188,2},{32,32}}</string>
                 <key>offset</key>
                 <string>{0,0}</string>
                 <key>rotated</key>
                 <false/>
                 <key>sourceColorRect</key>
-                <string>{{0,0},{100,100}}</string>
+                <string>{{0,0},{32,32}}</string>
                 <key>sourceSize</key>
-                <string>{100,100}</string>
+                <string>{32,32}</string>
             </dict>
         </dict>
         <key>metadata</key>
@@ -51,9 +51,9 @@
             <key>realTextureFileName</key>
             <string>texture.png</string>
             <key>size</key>
-            <string>{508,104}</string>
+            <string>{222,36}</string>
             <key>smartupdate</key>
-            <string>$TexturePacker:SmartUpdate:9b62b0a176a7e4e4de6c21d37fc11e3a:bd74f81a804d735e92a9dd6ba92915a7:ef86396999e18097aad14daa6638d5f9$</string>
+            <string>$TexturePacker:SmartUpdate:5bb9c7dfc6a55cd336c163cabddfda40:49a21d87317d8cd712ede7e45de0110a:ef86396999e18097aad14daa6638d5f9$</string>
             <key>textureFileName</key>
             <string>texture.png</string>
         </dict>
