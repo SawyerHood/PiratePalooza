@@ -6,6 +6,11 @@ namespace PiratePalooza
 {
 	public class PiratePaloozaApplicationDelegate :  CCApplicationDelegate
 	{
+		string map;
+
+		public PiratePaloozaApplicationDelegate(string map) : base() {
+			this.map = map;
+		}
 		public override void ApplicationDidFinishLaunching (CCApplication application, CCWindow mainWindow)
 		{
 			application.PreferMultiSampling = false;
@@ -16,10 +21,7 @@ namespace PiratePalooza
 			CCSimpleAudioEngine.SharedEngine.PreloadEffect ("Sounds/tap"); //Cache this sound
 			CCSize winSize = mainWindow.WindowSizeInPixels;
 			mainWindow.SetDesignResolutionSize(winSize.Width, winSize.Height, CCSceneResolutionPolicy.ExactFit);
-
-
-
-			CCScene scene = GameStartLayer.GameStartLayerScene(mainWindow);
+			CCScene scene = GameStartLayer.GameStartLayerScene(mainWindow, map);
 			mainWindow.RunWithScene (scene);
 		}
 

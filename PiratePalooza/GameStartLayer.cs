@@ -5,13 +5,14 @@ namespace PiratePalooza
 {
 	public class GameStartLayer : CCLayerColor
 	{
+		public string map;
 		public GameStartLayer () : base ()
 		{
 			var touchListener = new CCEventListenerTouchAllAtOnce ();
 			//touchListener.OnTouchesEnded = (touches, ccevent) => Window.DefaultDirector.ReplaceScene (GameLayer.GameScene (Window));
 			touchListener.OnTouchesEnded = (touches, ccevent) => {
 				Color = CCColor3B.Blue; //This is here for debugging purposes.
-				Window.DefaultDirector.ReplaceScene (NewGameLayer.GameScene (Window)); //Switches scenes for the application.
+				Window.DefaultDirector.ReplaceScene (NewGameLayer.GameScene (Window, map)); //Switches scenes for the application.
 			};
 
 			AddEventListener (touchListener, this);
@@ -39,10 +40,12 @@ namespace PiratePalooza
 		}
 
 
-		public static CCScene GameStartLayerScene (CCWindow mainWindow)
+		public static CCScene GameStartLayerScene (CCWindow mainWindow, string map)
 		{
+
 			var scene = new CCScene (mainWindow);
 			var layer = new GameStartLayer ();
+			layer.map = map;
 
 			scene.AddChild (layer);
 

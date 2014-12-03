@@ -33,12 +33,14 @@ namespace PiratePalooza
 		int playerTurn;
 		Stopwatch timeSinceFire;
 		CCLabelTtf turnLabel;
+		string map;
 
 
 
 
-		public NewGameLayer ()
+		public NewGameLayer (string map)
 		{
+			this.map = map;
 			timeSinceFire = new Stopwatch ();
 			timeSinceFire.Start ();
 			playerTurn = 0;
@@ -124,8 +126,8 @@ namespace PiratePalooza
 		}
 
 		void StackSomeBlocks() {
-			List<CCPoint> points = new List<CCPoint> ();
-			List<MapEntity> entities = new List<MapEntity> ();
+			//List<CCPoint> points = new List<CCPoint> ();
+			/*
 			points.Add (new CCPoint(500f, 0f));
 			points.Add (new CCPoint(500f, 100f));
 			points.Add (new CCPoint(500f, 200f));
@@ -141,18 +143,16 @@ namespace PiratePalooza
 			points.Add (new CCPoint(1200f, 500f));
 			points.Add (new CCPoint(1200f, 600f));
 			points.Add (new CCPoint(1050f, 700f));
-			points.Add (new CCPoint(1150f, 700f));
+			points.Add (new CCPoint(1150f, 700f));*/
 
-			for (int i = 0; i < points.Count; i++) {
+			/*for (int i = 0; i < points.Count; i++) {
 				//AddBlock (point);
 				entities.Add (new MapEntity (EntityType.Block, points[i].X, points[i].Y, 1));
 
-			}
-			string json = JsonConvert.SerializeObject (entities);
-			Console.WriteLine (json);
+			}*/
 
-			List<MapEntity> entities2 = JsonConvert.DeserializeObject <List<MapEntity>> (json);
-			LoadMapFromEntityList (entities2);
+			List<MapEntity> entities = JsonConvert.DeserializeObject <List<MapEntity>> (map);
+			LoadMapFromEntityList (entities);
 		}
 
 		//Sets up a solid ground
@@ -278,10 +278,10 @@ namespace PiratePalooza
 
 		}
 
-		public static CCScene GameScene (CCWindow mainWindow)
+		public static CCScene GameScene (CCWindow mainWindow, string map)
 		{
 			var scene = new CCScene (mainWindow);
-			var layer = new NewGameLayer ();
+			var layer = new NewGameLayer (map);
 
 			scene.AddChild (layer);
 

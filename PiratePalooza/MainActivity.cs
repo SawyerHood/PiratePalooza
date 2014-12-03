@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
@@ -28,8 +29,13 @@ namespace PiratePalooza
 		protected override void OnCreate(Bundle bundle)
 		{
 			base.OnCreate(bundle);
+			string map;
+			using (StreamReader sr = new StreamReader (Assets.Open ("map.json")))
+			{
+				map = sr.ReadToEnd ();
+			}
 			var application = new CCApplication(); //Creates a new Cocos2d app
-			application.ApplicationDelegate = new PiratePaloozaApplicationDelegate(); //The delegate is the entry point.
+			application.ApplicationDelegate = new PiratePaloozaApplicationDelegate(map); //The delegate is the entry point.
 			SetContentView(application.AndroidContentView);
 			application.StartGame(); 
 		}

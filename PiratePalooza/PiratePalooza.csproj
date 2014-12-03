@@ -94,5 +94,6 @@
     <AndroidAsset Include="Assets\Content\fonts\arial-22.xnb" />
     <AndroidAsset Include="Assets\Content\hd\texture.plist" />
     <AndroidAsset Include="Assets\Content\hd\texture.png" />
+    <AndroidAsset Include="Assets\map.json" />
   </ItemGroup>
 </Project>
