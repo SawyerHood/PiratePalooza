@@ -4,7 +4,7 @@ using CocosSharp;
 
 namespace PiratePalooza
 {
-	public enum EntityType {Block, Pirate, Cannon};
+	public enum EntityType {Block, Pirate, Cannon, Ball};
 
 	public class MapEntity
 	{

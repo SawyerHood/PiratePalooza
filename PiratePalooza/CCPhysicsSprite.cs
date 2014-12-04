@@ -7,7 +7,7 @@ using CocosSharp;
 
 namespace PiratePalooza
 {
-	internal class CCPhysicsSprite : CCSprite
+	public class CCPhysicsSprite : CCSprite
 	{
 		readonly float ptmRatio;
 
@@ -24,6 +24,7 @@ namespace PiratePalooza
 
 
 		public b2Body PhysicsBody { get; set; }
+		public EntityType type;
 
 		public void UpdateTransformLocation()
 		{

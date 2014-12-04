@@ -72,6 +72,7 @@
     <Compile Include="Cannon.cs" />
     <Compile Include="PiratePaloozaApplicationDelegate.cs" />
     <Compile Include="Map\MapEntity.cs" />
+    <Compile Include="ObjectDestroyListener.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />

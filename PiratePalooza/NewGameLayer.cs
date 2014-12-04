@@ -20,7 +20,7 @@ namespace PiratePalooza
 	{
 
 		const int PTM_RATIO = 32;
-		const float CANNON_FORCE = 1000;
+		const float CANNON_FORCE = 2000;
 
 		float elapsedTime;
 		b2World world;
@@ -30,6 +30,7 @@ namespace PiratePalooza
 		CCSpriteFrame ballFrame;
 		CCSpriteFrame cannonFrame;
 		List<Cannon> cannons;
+		Stack<CCPhysicsSprite> toRemove;
 		int playerTurn;
 		Stopwatch timeSinceFire;
 		CCLabelTtf turnLabel;
@@ -41,6 +42,7 @@ namespace PiratePalooza
 		public NewGameLayer (string map)
 		{
 			this.map = map;
+			toRemove = new Stack<CCPhysicsSprite> ();
 			timeSinceFire = new Stopwatch ();
 			timeSinceFire.Start ();
 			playerTurn = 0;
@@ -87,7 +89,6 @@ namespace PiratePalooza
 
 
 		void touchFunction(List<CCTouch> touches, CCEvent touchEvent) {
-			//Color = CCColor3B.Black;
 			if (timeSinceFire.ElapsedMilliseconds < 1000) {
 				return;
 			}
@@ -102,6 +103,21 @@ namespace PiratePalooza
 				playerTurn = 0;
 			}
 			turnLabel.Text = "Player " + (playerTurn + 1) + "'s Turn";
+		}
+
+		void TryRemoveEntity (CCPhysicsSprite sprite) {
+			if (sprite == null) {
+				return;
+			}
+			if (sprite.type == EntityType.Block || sprite.type == EntityType.Pirate) {
+				sprite.PhysicsBody.World.DestroyBody (sprite.PhysicsBody);
+				sprite.Visible = false;
+				sprite.RemoveFromParent ();
+			}
+		}
+
+		public void AddToRemoveList (CCPhysicsSprite sprite) {
+			toRemove.Push(sprite);
 		}
 
 		void StartScheduling() {
@@ -122,35 +138,16 @@ namespace PiratePalooza
 						sprite.UpdateTransformLocation();
 					}
 				}
+
+				while (toRemove.Count > 0) {
+					TryRemoveEntity( toRemove.Pop());
+				}
+
+
 			});
 		}
 
 		void StackSomeBlocks() {
-			//List<CCPoint> points = new List<CCPoint> ();
-			/*
-			points.Add (new CCPoint(500f, 0f));
-			points.Add (new CCPoint(500f, 100f));
-			points.Add (new CCPoint(500f, 200f));
-			points.Add (new CCPoint(500f, 300f));
-			points.Add (new CCPoint(500f, 400f));
-			points.Add (new CCPoint(500f, 500f));
-			points.Add (new CCPoint(1000f, 600f));
-			points.Add (new CCPoint(1200f, 0f));
-			points.Add (new CCPoint(1200f, 100f));
-			points.Add (new CCPoint(1200f, 200f));
-			points.Add (new CCPoint(1200f, 300f));
-			points.Add (new CCPoint(1200f, 400f));
-			points.Add (new CCPoint(1200f, 500f));
-			points.Add (new CCPoint(1200f, 600f));
-			points.Add (new CCPoint(1050f, 700f));
-			points.Add (new CCPoint(1150f, 700f));*/
-
-			/*for (int i = 0; i < points.Count; i++) {
-				//AddBlock (point);
-				entities.Add (new MapEntity (EntityType.Block, points[i].X, points[i].Y, 1));
-
-			}*/
-
 			List<MapEntity> entities = JsonConvert.DeserializeObject <List<MapEntity>> (map);
 			LoadMapFromEntityList (entities);
 		}
@@ -166,6 +163,7 @@ namespace PiratePalooza
 
 			world.SetAllowSleeping (true);
 			world.SetContinuousPhysics (true);
+			world.SetContactListener (new ObjectDestroyListener(this));
 
 			var def = new b2BodyDef ();
 			def.allowSleep = true;
@@ -185,6 +183,7 @@ namespace PiratePalooza
 		void AddBlock (CCPoint p) {
 
 			var sprite = new CCPhysicsSprite (blockFrame, PTM_RATIO);
+			sprite.type = EntityType.Block;
 			spriteBatch.AddChild (sprite);
 
 			sprite.Position = new CCPoint (p.X, p.Y);
@@ -204,6 +203,7 @@ namespace PiratePalooza
 			fd.restitution = 0f;
 			fd.friction = 1f;
 			body.CreateFixture (fd);
+			body.UserData = sprite;
 
 			sprite.PhysicsBody = body;
 
@@ -228,6 +228,7 @@ namespace PiratePalooza
 		void AddBall (CCPoint p, float angle) {
 
 			var sprite = new CCPhysicsSprite (ballFrame, PTM_RATIO);
+			sprite.type = EntityType.Ball;
 			spriteBatch.AddChild (sprite);
 
 			sprite.Position = new CCPoint (p.X, p.Y);
@@ -248,6 +249,7 @@ namespace PiratePalooza
 			fd.restitution = 0f;
 			fd.friction = 1f;
 			body.CreateFixture (fd);
+			body.UserData = sprite;
 
 			sprite.PhysicsBody = body;
 			var angleInRadians = (-angle) * Math.PI / 180.0;
