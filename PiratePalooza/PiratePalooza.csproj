@@ -67,7 +67,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GameStartLayer.cs" />
     <Compile Include="CCPhysicsSprite.cs" />
-    <Compile Include="GameLayer.cs" />
     <Compile Include="NewGameLayer.cs" />
     <Compile Include="Cannon.cs" />
     <Compile Include="PiratePaloozaApplicationDelegate.cs" />

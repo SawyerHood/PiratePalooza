@@ -229,16 +229,14 @@ namespace PiratePalooza
 		}
 
 		void LoadMapFromEntityList (List<MapEntity> list) {
-			List<MapEntity> entities2 = new List<MapEntity> ();
 			foreach (var entity in list) {
-				entities2.Add (new MapEntity(entity.type, 1184.0f - entity.x, entity.y, 1));
 				if (entity.type == EntityType.Block) {
 					AddBlock (new CCPoint (entity.x, entity.y));
 				} else if (entity.type == EntityType.Pirate) {
 					AddPirate(new CCPoint (entity.x, entity.y), entity.playerSide);
 				}
 			}
-			Console.WriteLine (JsonConvert.SerializeObject(entities2, Formatting.Indented));
+
 		}
 
 
