@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using CocosDenshion;
 using CocosSharp;
 using System.Linq;
 using System.Diagnostics;
 using Newtonsoft.Json;
-
-#if NETFX_CORE
-
-#endif
-
 using Box2D.Common;
 using Box2D.Dynamics;
 using Box2D.Collision.Shapes;
@@ -20,7 +16,7 @@ namespace PiratePalooza
 	{
 
 		const int PTM_RATIO = 32;
-		const float CANNON_FORCE = 6000;
+		const float CANNON_FORCE = 15000;
 
 		float elapsedTime;
 		b2World world;
@@ -33,20 +29,19 @@ namespace PiratePalooza
 		List<Cannon> cannons;
 		List<int> pirateCounts;
 		List<MapEntity> entities;
-		Stack<CCPhysicsSprite> toRemove;
+		ConcurrentStack<CCPhysicsSprite> toRemove;
 		int playerTurn;
 		Stopwatch timeSinceFire;
 		CCLabelTtf turnLabel;
 		string map;
-
-
-
+		bool gameOver;
 
 		public NewGameLayer (string map)
 		{
+			gameOver = false;
 			this.map = map;
 			entities = JsonConvert.DeserializeObject <List<MapEntity>> (map);
-			toRemove = new Stack<CCPhysicsSprite> ();
+			toRemove = new ConcurrentStack<CCPhysicsSprite> ();
 			timeSinceFire = new Stopwatch ();
 			timeSinceFire.Start ();
 			playerTurn = 0;
@@ -54,7 +49,7 @@ namespace PiratePalooza
 			touchListener.OnTouchesEnded = touchFunction;
 			AddEventListener (touchListener, this);
 			spriteSheet = new CCSpriteSheet ("texture.plist");
-			Color = new CCColor3B (CCColor4B.White);
+			Color = new CCColor3B (CCColor4B.Aquamarine);
 			Opacity = 255;
 			spriteBatch = new CCSpriteBatchNode ("texture.png", 100);
 			blockFrame = spriteSheet.Frames.Find(x => x.TextureFilename == "block.png");
@@ -89,7 +84,7 @@ namespace PiratePalooza
 		void InitLabel() {
 			turnLabel = new CCLabelTtf("Player 1's Turn", "arial", 22) {
 				Position = new CCPoint(VisibleBoundsWorldspace.Center.X + 600, VisibleBoundsWorldspace.Center.Y + 600),
-				Color = CCColor3B.Green,
+				Color = CCColor3B.Black,
 				HorizontalAlignment = CCTextAlignment.Center,
 				VerticalAlignment = CCVerticalTextAlignment.Center,
 				AnchorPoint = CCPoint.AnchorMiddle
@@ -103,17 +98,21 @@ namespace PiratePalooza
 			if (timeSinceFire.ElapsedMilliseconds < 1000) {
 				return;
 			}
-			timeSinceFire.Restart ();
-			var currCannon = cannons[playerTurn];
-			var location = touches [0].LocationOnScreen;
-			location = WorldToScreenspace (location);  //Layer.WorldToScreenspace(location); 
-			float angle = currCannon.AimCannon (location);
-			AddBall (currCannon.Position, angle);
-			playerTurn += 1;
-			if (playerTurn >= cannons.Count) {
-				playerTurn = 0;
+			if (gameOver) {
+				Window.DefaultDirector.ReplaceScene (NewGameLayer.GameScene (Window, map));
+			} else {
+				timeSinceFire.Restart ();
+				var currCannon = cannons [playerTurn];
+				var location = touches [0].LocationOnScreen;
+				location = WorldToScreenspace (location);  //Layer.WorldToScreenspace(location); 
+				float angle = currCannon.AimCannon (location);
+				AddBall (currCannon.Position, angle);
+				playerTurn += 1;
+				if (playerTurn >= cannons.Count) {
+					playerTurn = 0;
+				}
+				turnLabel.Text = "Player " + (playerTurn + 1) + "'s Turn";
 			}
-			turnLabel.Text = "Player " + (playerTurn + 1) + "'s Turn";
 		}
 
 		void TryRemoveEntity (CCPhysicsSprite sprite) {
@@ -124,6 +123,10 @@ namespace PiratePalooza
 			if (sprite.type == EntityType.Pirate && sprite.Visible) {
 				pirateCounts [sprite.playerSide] -= 1;
 				Console.WriteLine ("Pirate count for player " + sprite.playerSide + ": " + pirateCounts [sprite.playerSide]);
+				if (pirateCounts [sprite.playerSide] <= 0) {
+					gameOver = true;
+					turnLabel.Text = "PLAYER  " + (((sprite.playerSide + 1) % 2) + 1) + " WINS. TAP TO PLAY AGAIN.";
+				}
 			}
 
 				sprite.PhysicsBody.World.DestroyBody (sprite.PhysicsBody);
@@ -148,21 +151,22 @@ namespace PiratePalooza
 
 				foreach (CCPhysicsSprite sprite in spriteBatch.Children) {
 					if (sprite.Visible && sprite.PhysicsBody.Position.x < 0f || sprite.PhysicsBody.Position.x * PTM_RATIO > ContentSize.Width) { //or should it be Layer.VisibleBoundsWorldspace.Size.Width
-						/*world.DestroyBody (sprite.PhysicsBody);
-						sprite.Visible = false;
-						sprite.RemoveFromParent ();*/
-						TryRemoveEntity(sprite);
+						AddToRemoveList(sprite);
 					} else {
 						sprite.UpdateTransformLocation();
 					}
 				}
 
 				while (toRemove.Count > 0) {
-					TryRemoveEntity( toRemove.Pop());
+					CCPhysicsSprite s = null;
+
+					if(toRemove.TryPop(out s)) {
+						TryRemoveEntity (s);
+					}
 				}
 
-
 			});
+				
 		}
 			
 
@@ -177,7 +181,7 @@ namespace PiratePalooza
 
 			world.SetAllowSleeping (true);
 			world.SetContinuousPhysics (true);
-			world.SetContactListener (new ObjectDestroyListener(this));
+			//world.SetContactListener (new ObjectDestroyListener(this));
 
 			var def = new b2BodyDef ();
 			def.allowSleep = true;
@@ -225,14 +229,16 @@ namespace PiratePalooza
 		}
 
 		void LoadMapFromEntityList (List<MapEntity> list) {
+			List<MapEntity> entities2 = new List<MapEntity> ();
 			foreach (var entity in list) {
-				Console.WriteLine (entity.x);
+				entities2.Add (new MapEntity(entity.type, 1184.0f - entity.x, entity.y, 1));
 				if (entity.type == EntityType.Block) {
 					AddBlock (new CCPoint (entity.x, entity.y));
 				} else if (entity.type == EntityType.Pirate) {
 					AddPirate(new CCPoint (entity.x, entity.y), entity.playerSide);
 				}
 			}
+			Console.WriteLine (JsonConvert.SerializeObject(entities2, Formatting.Indented));
 		}
 
 
@@ -256,7 +262,7 @@ namespace PiratePalooza
 
 			var fd = new b2FixtureDef ();
 			fd.shape = circle;
-			fd.density = 7f;
+			fd.density = 10f;
 			fd.restitution = 0f;
 			fd.friction = 1f;
 			body.CreateFixture (fd);

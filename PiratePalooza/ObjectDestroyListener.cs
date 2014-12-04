@@ -19,11 +19,11 @@ namespace PiratePalooza
 		override public void  PostSolve (b2Contact contact, ref b2ContactImpulse impulse)
 		{
 			if(impulse.normalImpulses[0] > 1f)
-				Console.WriteLine (impulse.normalImpulses [0]);
+
 			if (impulse.normalImpulses [0] > BREAK_FORCE) {
 				if (contact.FixtureA.Body.UserData is CCPhysicsSprite) {
 					CCPhysicsSprite spriteA = (CCPhysicsSprite)contact.FixtureA.Body.UserData;
-					if (spriteA != null && (spriteA.type == EntityType.Block || spriteA.type == EntityType.Pirate)) {
+					if (spriteA != null && (spriteA.type == EntityType.Block)) {
 						game.AddToRemoveList (spriteA);
 					}
 				}
@@ -31,7 +31,7 @@ namespace PiratePalooza
 				if (contact.FixtureB.Body.UserData is CCPhysicsSprite) {
 					CCPhysicsSprite spriteB = (CCPhysicsSprite)contact.FixtureA.Body.UserData;
 
-					if (spriteB != null && (spriteB.type == EntityType.Block || spriteB.type == EntityType.Pirate)) {
+					if (spriteB != null && (spriteB.type == EntityType.Block)) {
 						game.AddToRemoveList (spriteB);
 					}
 				}
