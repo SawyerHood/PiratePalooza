@@ -1,4 +1,9 @@
-﻿using System;
+﻿/*
+ * NewGameLayer.cs 
+ * Author Sawyer Hood
+ */
+
+using System;
 using CocosSharp;
 
 namespace PiratePalooza

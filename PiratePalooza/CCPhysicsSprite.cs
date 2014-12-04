@@ -1,4 +1,7 @@
-﻿//Class taken from the Xamarin CocosSharp Tutorial
+﻿/*
+ * CCPhysicsSprite
+ * Adapted by Sawyer from the Xamarin CocosSharp Tutorial, to add rotation and more functionality.
+ */
 
 using System;
 using Box2D.Common;

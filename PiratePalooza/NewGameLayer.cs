@@ -1,4 +1,9 @@
-﻿using System;
+﻿/*
+ * NewGameLayer.cs 
+ * Author Sawyer Hood
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using CocosDenshion;
@@ -17,8 +22,6 @@ namespace PiratePalooza
 
 		const int PTM_RATIO = 32;
 		const float CANNON_FORCE = 15000;
-
-		float elapsedTime;
 		b2World world;
 		CCSpriteBatchNode spriteBatch;
 		CCSpriteSheet spriteSheet;
@@ -40,9 +43,9 @@ namespace PiratePalooza
 		{
 			gameOver = false;
 			this.map = map;
-			entities = JsonConvert.DeserializeObject <List<MapEntity>> (map);
-			toRemove = new ConcurrentStack<CCPhysicsSprite> ();
-			timeSinceFire = new Stopwatch ();
+			entities = JsonConvert.DeserializeObject <List<MapEntity>> (map); 
+			toRemove = new ConcurrentStack<CCPhysicsSprite> (); //So we don't remove sprites while BOX2d steps.
+			timeSinceFire = new Stopwatch (); // Cool down for firing
 			timeSinceFire.Start ();
 			playerTurn = 0;
 			var touchListener = new CCEventListenerTouchAllAtOnce ();
@@ -62,6 +65,7 @@ namespace PiratePalooza
 			StartScheduling ();
 		}
 
+		//Creates the Cannons for each player. 
 		void InitCannons() {
 			cannons = new List<Cannon> ();
 			Cannon cannonObj;
@@ -81,6 +85,7 @@ namespace PiratePalooza
 			}
 		}
 
+		//This Label is used to state whose turn it is.
 		void InitLabel() {
 			turnLabel = new CCLabelTtf("Player 1's Turn", "arial", 22) {
 				Position = new CCPoint(VisibleBoundsWorldspace.Center.X + 600, VisibleBoundsWorldspace.Center.Y + 600),
@@ -93,14 +98,14 @@ namespace PiratePalooza
 			AddChild (turnLabel);
 		}
 
-
+		//Called everytime the screen is touched.
 		void touchFunction(List<CCTouch> touches, CCEvent touchEvent) {
 			if (timeSinceFire.ElapsedMilliseconds < 1000) {
 				return;
 			}
 			if (gameOver) {
-				Window.DefaultDirector.ReplaceScene (NewGameLayer.GameScene (Window, map));
-			} else {
+				Window.DefaultDirector.ReplaceScene (NewGameLayer.GameScene (Window, map)); //Restart the game.
+			} else { //Fire a cannon.
 				timeSinceFire.Restart ();
 				var currCannon = cannons [playerTurn];
 				var location = touches [0].LocationOnScreen;
@@ -115,12 +120,13 @@ namespace PiratePalooza
 			}
 		}
 
+		//This is run when an entity is removed from the game.
 		void TryRemoveEntity (CCPhysicsSprite sprite) {
 			if (sprite == null) {
 				return;
 			}
 
-			if (sprite.type == EntityType.Pirate && sprite.Visible) {
+			if (sprite.type == EntityType.Pirate && sprite.Visible) { //Reduce the pirate counts for each player.
 				pirateCounts [sprite.playerSide] -= 1;
 				Console.WriteLine ("Pirate count for player " + sprite.playerSide + ": " + pirateCounts [sprite.playerSide]);
 				if (pirateCounts [sprite.playerSide] <= 0) {
@@ -140,16 +146,13 @@ namespace PiratePalooza
 			toRemove.Push(sprite);
 		}
 
+		//These are the events that run periodically.
 		void StartScheduling() {
-			Schedule (t => {
-				elapsedTime += t;
-				//AddBlock();
-			}, 1.0f);
 
 			Schedule (t => {
-				world.Step (t, 8, 1);
+				world.Step (t, 8, 1); //Update physics
 
-				foreach (CCPhysicsSprite sprite in spriteBatch.Children) {
+				foreach (CCPhysicsSprite sprite in spriteBatch.Children) { //Remove entities that are outside of the world bounds.
 					if (sprite.Visible && sprite.PhysicsBody.Position.x < 0f || sprite.PhysicsBody.Position.x * PTM_RATIO > ContentSize.Width) { //or should it be Layer.VisibleBoundsWorldspace.Size.Width
 						AddToRemoveList(sprite);
 					} else {
@@ -157,7 +160,7 @@ namespace PiratePalooza
 					}
 				}
 
-				while (toRemove.Count > 0) {
+				while (toRemove.Count > 0) { 
 					CCPhysicsSprite s = null;
 
 					if(toRemove.TryPop(out s)) {
@@ -171,7 +174,7 @@ namespace PiratePalooza
 			
 
 		//Sets up a solid ground
-		//Taken from Xamarin Tutorial.
+		//Adapted from Xamarin Tutorial.
 		void InitPhysics ()
 		{
 			CCSize s = Layer.VisibleBoundsWorldspace.Size;
@@ -198,6 +201,19 @@ namespace PiratePalooza
 			groundBody.CreateFixture (fd);
 		}
 
+		//Set up the map from the entity file.
+		void LoadMapFromEntityList (List<MapEntity> list) {
+			foreach (var entity in list) {
+				if (entity.type == EntityType.Block) {
+					AddBlock (new CCPoint (entity.x, entity.y));
+				} else if (entity.type == EntityType.Pirate) {
+					AddPirate(new CCPoint (entity.x, entity.y), entity.playerSide);
+				}
+			}
+
+		}
+
+		//Adds a block to the game.
 		void AddBlock (CCPoint p) {
 
 			var sprite = new CCPhysicsSprite (blockFrame, PTM_RATIO);
@@ -228,18 +244,9 @@ namespace PiratePalooza
 
 		}
 
-		void LoadMapFromEntityList (List<MapEntity> list) {
-			foreach (var entity in list) {
-				if (entity.type == EntityType.Block) {
-					AddBlock (new CCPoint (entity.x, entity.y));
-				} else if (entity.type == EntityType.Pirate) {
-					AddPirate(new CCPoint (entity.x, entity.y), entity.playerSide);
-				}
-			}
-
-		}
 
 
+		//Adds a cannon ball to the game.
 		void AddBall (CCPoint p, float angle) {
 
 			var sprite = new CCPhysicsSprite (ballFrame, PTM_RATIO);
@@ -274,6 +281,7 @@ namespace PiratePalooza
 
 		}
 
+		//Adds a pirate to the game.
 		void AddPirate (CCPoint p, int playerSide) {
 
 			var sprite = new CCPhysicsSprite (pirateFrame, PTM_RATIO);
@@ -313,6 +321,7 @@ namespace PiratePalooza
 
 		}
 
+		//Once the scene is entered some setup is done.
 		public override void OnEnter()
 		{
 			base.OnEnter ();
@@ -321,6 +330,7 @@ namespace PiratePalooza
 
 		}
 
+		//Initialization function.
 		public static CCScene GameScene (CCWindow mainWindow, string map)
 		{
 			var scene = new CCScene (mainWindow);

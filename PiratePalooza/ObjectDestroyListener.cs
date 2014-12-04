@@ -1,4 +1,9 @@
-﻿using System;
+﻿/*
+ * ObjectDestroyListener.cs 
+ * Author Sawyer Hood
+ */
+
+using System;
 using Box2D.Collision;
 using Box2D.Dynamics;
 using Box2D.Dynamics.Contacts;

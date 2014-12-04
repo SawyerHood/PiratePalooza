@@ -1,4 +1,8 @@
-﻿using System;
+﻿/*
+ * MapEntity.cs 
+ * Author Sawyer Hood
+ */
+using System;
 using CocosSharp;
 
 
