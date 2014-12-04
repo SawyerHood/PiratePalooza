@@ -20,7 +20,7 @@ namespace PiratePalooza
 	{
 
 		const int PTM_RATIO = 32;
-		const float CANNON_FORCE = 2000;
+		const float CANNON_FORCE = 6000;
 
 		float elapsedTime;
 		b2World world;
@@ -29,7 +29,10 @@ namespace PiratePalooza
 		CCSpriteFrame blockFrame;
 		CCSpriteFrame ballFrame;
 		CCSpriteFrame cannonFrame;
+		CCSpriteFrame pirateFrame;
 		List<Cannon> cannons;
+		List<int> pirateCounts;
+		List<MapEntity> entities;
 		Stack<CCPhysicsSprite> toRemove;
 		int playerTurn;
 		Stopwatch timeSinceFire;
@@ -42,6 +45,7 @@ namespace PiratePalooza
 		public NewGameLayer (string map)
 		{
 			this.map = map;
+			entities = JsonConvert.DeserializeObject <List<MapEntity>> (map);
 			toRemove = new Stack<CCPhysicsSprite> ();
 			timeSinceFire = new Stopwatch ();
 			timeSinceFire.Start ();
@@ -56,6 +60,7 @@ namespace PiratePalooza
 			blockFrame = spriteSheet.Frames.Find(x => x.TextureFilename == "block.png");
 			ballFrame = spriteSheet.Frames.Find(x => x.TextureFilename == "cannonball.png");
 			cannonFrame = spriteSheet.Frames.Find(x => x.TextureFilename == "cannon.png");
+			pirateFrame = spriteSheet.Frames.Find(x => x.TextureFilename == "pirate.png");
 			AddChild (spriteBatch, 1, 1);
 			InitCannons ();
 			InitLabel ();
@@ -73,6 +78,12 @@ namespace PiratePalooza
 			cannons.Add (cannonObj2);
 			AddChild (cannonObj);
 			AddChild (cannonObj2);
+			pirateCounts = new List<int> ();
+			for (int i = 0; i < 2; i++) {
+
+				pirateCounts.Add (entities.FindAll(x => (x.type == EntityType.Pirate && x.playerSide == i)).Count);
+				Console.WriteLine ("Pirate count for player " + i + ": " + pirateCounts[i]);
+			}
 		}
 
 		void InitLabel() {
@@ -146,11 +157,7 @@ namespace PiratePalooza
 
 			});
 		}
-
-		void StackSomeBlocks() {
-			List<MapEntity> entities = JsonConvert.DeserializeObject <List<MapEntity>> (map);
-			LoadMapFromEntityList (entities);
-		}
+			
 
 		//Sets up a solid ground
 		//Taken from Xamarin Tutorial.
@@ -199,7 +206,7 @@ namespace PiratePalooza
 
 			var fd = new b2FixtureDef ();
 			fd.shape = rect;
-			fd.density = 1f;
+			fd.density = .5f;
 			fd.restitution = 0f;
 			fd.friction = 1f;
 			body.CreateFixture (fd);
@@ -207,11 +214,6 @@ namespace PiratePalooza
 
 			sprite.PhysicsBody = body;
 
-			#if !NETFX_CORE
-			Console.WriteLine ("sprite batch node count = {0}", spriteBatch.ChildrenCount);
-			#else
-
-			#endif
 
 		}
 
@@ -219,8 +221,10 @@ namespace PiratePalooza
 			foreach (var entity in list) {
 				Console.WriteLine (entity.x);
 				if (entity.type == EntityType.Block) {
-					AddBlock (new CCPoint(entity.x, entity.y));
-				} 
+					AddBlock (new CCPoint (entity.x, entity.y));
+				} else if (entity.type == EntityType.Pirate) {
+					AddPirate(new CCPoint (entity.x, entity.y), entity.playerSide);
+				}
 			}
 		}
 
@@ -245,7 +249,7 @@ namespace PiratePalooza
 
 			var fd = new b2FixtureDef ();
 			fd.shape = circle;
-			fd.density = 1f;
+			fd.density = 7f;
 			fd.restitution = 0f;
 			fd.friction = 1f;
 			body.CreateFixture (fd);
@@ -255,11 +259,36 @@ namespace PiratePalooza
 			var angleInRadians = (-angle) * Math.PI / 180.0;
 			body.ApplyForceToCenter (new b2Vec2((float)Math.Cos (angleInRadians) * CANNON_FORCE, (float)Math.Sin (angleInRadians) * CANNON_FORCE));
 
-			#if !NETFX_CORE
-			Console.WriteLine ("sprite batch node count = {0}", spriteBatch.ChildrenCount);
-			#else
+	
 
-			#endif
+		}
+
+		void AddPirate (CCPoint p, int playerSide) {
+
+			var sprite = new CCPhysicsSprite (pirateFrame, PTM_RATIO);
+			sprite.type = EntityType.Pirate;
+			spriteBatch.AddChild (sprite);
+
+			sprite.Position = new CCPoint (p.X, p.Y);
+
+			var def = new b2BodyDef ();
+			def.position = new b2Vec2 (p.X / PTM_RATIO, p.Y / PTM_RATIO);
+			def.linearVelocity = new b2Vec2 (0.0f, 0.0f);
+			def.type = b2BodyType.b2_dynamicBody;
+			b2Body body = world.CreateBody (def);
+
+			var circle = new b2CircleShape();
+			circle.Radius = .5f;
+
+			var fd = new b2FixtureDef ();
+			fd.shape = circle;
+			fd.density = .5f;
+			fd.restitution = 0f;
+			fd.friction = 1f;
+			body.CreateFixture (fd);
+			body.UserData = sprite;
+
+			sprite.PhysicsBody = body;
 
 		}
 			
@@ -276,7 +305,7 @@ namespace PiratePalooza
 		{
 			base.OnEnter ();
 			InitPhysics ();
-			StackSomeBlocks ();
+			LoadMapFromEntityList (entities);
 
 		}
 

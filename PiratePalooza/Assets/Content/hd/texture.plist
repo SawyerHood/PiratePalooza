@@ -43,6 +43,19 @@
                 <key>sourceSize</key>
                 <string>{32,32}</string>
             </dict>
+            <key>pirate.png</key>
+            <dict>
+                <key>frame</key>
+                <string>{{222,2},{32,32}}</string>
+                <key>offset</key>
+                <string>{0,0}</string>
+                <key>rotated</key>
+                <false/>
+                <key>sourceColorRect</key>
+                <string>{{0,0},{32,32}}</string>
+                <key>sourceSize</key>
+                <string>{32,32}</string>
+            </dict>
         </dict>
         <key>metadata</key>
         <dict>
@@ -51,9 +64,9 @@
             <key>realTextureFileName</key>
             <string>texture.png</string>
             <key>size</key>
-            <string>{222,36}</string>
+            <string>{256,36}</string>
             <key>smartupdate</key>
-            <string>$TexturePacker:SmartUpdate:5bb9c7dfc6a55cd336c163cabddfda40:49a21d87317d8cd712ede7e45de0110a:ef86396999e18097aad14daa6638d5f9$</string>
+            <string>$TexturePacker:SmartUpdate:d884705032e19936d392c3a0bf195c7b:638721351c218bf5d3fd1e07785ca180:ef86396999e18097aad14daa6638d5f9$</string>
             <key>textureFileName</key>
             <string>texture.png</string>
         </dict>
