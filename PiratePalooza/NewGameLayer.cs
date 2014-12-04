@@ -288,6 +288,9 @@ namespace PiratePalooza
 			sprite.type = EntityType.Pirate;
 			spriteBatch.AddChild (sprite);
 			sprite.playerSide = playerSide;
+			if (sprite.playerSide == 1) {
+				sprite.Color = CCColor3B.Green;
+			}
 
 			sprite.Position = new CCPoint (p.X, p.Y);
 
