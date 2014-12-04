@@ -23,12 +23,17 @@ namespace PiratePalooza
 			if (impulse.normalImpulses [0] > BREAK_FORCE) {
 				if (contact.FixtureA.Body.UserData is CCPhysicsSprite) {
 					CCPhysicsSprite spriteA = (CCPhysicsSprite)contact.FixtureA.Body.UserData;
-					game.AddToRemoveList (spriteA);
+					if (spriteA != null && (spriteA.type == EntityType.Block || spriteA.type == EntityType.Pirate)) {
+						game.AddToRemoveList (spriteA);
+					}
 				}
 
 				if (contact.FixtureB.Body.UserData is CCPhysicsSprite) {
 					CCPhysicsSprite spriteB = (CCPhysicsSprite)contact.FixtureA.Body.UserData;
-					game.AddToRemoveList (spriteB);
+
+					if (spriteB != null && (spriteB.type == EntityType.Block || spriteB.type == EntityType.Pirate)) {
+						game.AddToRemoveList (spriteB);
+					}
 				}
 			}
 		}

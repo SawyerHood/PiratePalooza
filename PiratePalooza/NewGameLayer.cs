@@ -71,9 +71,9 @@ namespace PiratePalooza
 			cannons = new List<Cannon> ();
 			Cannon cannonObj;
 			cannonObj = new Cannon (cannonFrame);
-			cannonObj.Position = new CCPoint (400, 100);
+			cannonObj.Position = new CCPoint (442, 100);
 			Cannon cannonObj2 = new Cannon (cannonFrame);
-			cannonObj2.Position = new CCPoint (880, 100);
+			cannonObj2.Position = new CCPoint (742, 100);
 			cannons.Add (cannonObj);
 			cannons.Add (cannonObj2);
 			AddChild (cannonObj);
@@ -120,11 +120,17 @@ namespace PiratePalooza
 			if (sprite == null) {
 				return;
 			}
-			if (sprite.type == EntityType.Block || sprite.type == EntityType.Pirate) {
+
+			if (sprite.type == EntityType.Pirate && sprite.Visible) {
+				pirateCounts [sprite.playerSide] -= 1;
+				Console.WriteLine ("Pirate count for player " + sprite.playerSide + ": " + pirateCounts [sprite.playerSide]);
+			}
+
 				sprite.PhysicsBody.World.DestroyBody (sprite.PhysicsBody);
 				sprite.Visible = false;
 				sprite.RemoveFromParent ();
-			}
+
+
 		}
 
 		public void AddToRemoveList (CCPhysicsSprite sprite) {
@@ -142,9 +148,10 @@ namespace PiratePalooza
 
 				foreach (CCPhysicsSprite sprite in spriteBatch.Children) {
 					if (sprite.Visible && sprite.PhysicsBody.Position.x < 0f || sprite.PhysicsBody.Position.x * PTM_RATIO > ContentSize.Width) { //or should it be Layer.VisibleBoundsWorldspace.Size.Width
-						world.DestroyBody (sprite.PhysicsBody);
+						/*world.DestroyBody (sprite.PhysicsBody);
 						sprite.Visible = false;
-						sprite.RemoveFromParent ();
+						sprite.RemoveFromParent ();*/
+						TryRemoveEntity(sprite);
 					} else {
 						sprite.UpdateTransformLocation();
 					}
@@ -268,6 +275,7 @@ namespace PiratePalooza
 			var sprite = new CCPhysicsSprite (pirateFrame, PTM_RATIO);
 			sprite.type = EntityType.Pirate;
 			spriteBatch.AddChild (sprite);
+			sprite.playerSide = playerSide;
 
 			sprite.Position = new CCPoint (p.X, p.Y);
 
