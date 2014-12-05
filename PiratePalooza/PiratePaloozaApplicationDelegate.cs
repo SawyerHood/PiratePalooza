@@ -1,4 +1,7 @@
-﻿using System;
+﻿/*
+ * Authors Sawyer Hood, Max Miller, Victoria Deen, Gaby Llave
+ */
+using System;
 using CocosSharp;
 using CocosDenshion;
 
@@ -27,10 +30,9 @@ namespace PiratePalooza
 
 		public override void ApplicationDidEnterBackground (CCApplication application)
 		{
-			// stop all of the animation actions that are running.
+
 			application.Paused = true;
 
-			// if you use SimpleAudioEngine, your music must be paused
 			CCSimpleAudioEngine.SharedEngine.PauseBackgroundMusic ();
 		}
 
@@ -38,7 +40,7 @@ namespace PiratePalooza
 		{
 			application.Paused = false;
 
-			// if you use SimpleAudioEngine, your background music track must resume here. 
+			 
 			CCSimpleAudioEngine.SharedEngine.ResumeBackgroundMusic ();
 		}
 	}

@@ -1,6 +1,6 @@
 ﻿/*
  * MapEntity.cs 
- * Author Sawyer Hood
+ * Authors Sawyer Hood, Max Miller, Victoria Deen, Gaby Llave
  */
 using System;
 using CocosSharp;
